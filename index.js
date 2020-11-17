@@ -22,55 +22,112 @@ function power(val, mult) {
 	return pow;
 }
 
-function factorial(num) {
-	if (num == 0 || num == 1) { return 1; }
-	for (i = num - 1; i >= 1; i--) {
-		num *= i;
-	}
-	return num;
-}
-
 function operate(numOne, numTwo, operator) {
     switch (operator) {
-        case "add":
-            return add(numOne, numTwo);
-        case "sub":
-            return subtract(numOne, numTwo);
-        case "mul":
-            return multiply(numOne, numTwo);
-        case "div":
-            return divide(numOne, numTwo);
-        case "pow":
-            return power(numOne, numTwo);
+        case "+":
+            return Math.round(add(numOne, numTwo));
+        case "-":
+            return Math.round(subtract(numOne, numTwo));
+        case "*":
+            return Math.round(multiply(numOne, numTwo));
+        case "÷":
+            return Math.round(divide(numOne, numTwo));
         default:
-            return factorial(numOne);
+            return Math.round(power(numOne, numTwo));
     }
 }
 
-let dispLast = '';
-let dispCurrent = '';
+//Stores variables used for operations.
+let newNum = 0;
+let oldNum = 0;
+let operator = '';
 
+//Stores display components.
 const dispLastText = document.querySelector('.display-last');
 const dispCurrentText = document.querySelector('.display-current');
 
-function displayUpdate() {
-    dispLastText.textContent = dispLast;
-    dispCurrentText.textContent = dispCurrent;
+//Updates both the lower, and upper display segment.
+function update() {
+    if (oldNum == 0) {
+        dispLastText.textContent = ``;
+        dispCurrentText.textContent = `${newNum}`;
+    } else {
+        dispLastText.textContent = `${oldNum} ${operator}`;
+        dispCurrentText.textContent = `${newNum}`;
+    }
 }
 
 let clear = document.querySelector('.clear');
 clear.addEventListener('click', clearDisplay);
 
+//Clears the display
 function clearDisplay() {
-    dispLast = '';
-    dispCurrent = '';
-    displayUpdate();
+    newNum = 0;
+    oldNum = 0;
+    operator = '';
+    update();
 }
 
 const nums = document.querySelectorAll('.num');
 nums.forEach(btn => btn.addEventListener('click', function() { addNum(btn.textContent) }));
 
+//Used to add numbers into the lower segment of the display, and parse the number into the variable used for calculations.
 function addNum(val) {
-    dispCurrent += `${val}`;
-    displayUpdate();
+    let tempNum;
+    if (newNum == 0) {
+        tempNum = val;
+    } else {
+        tempNum = dispCurrentText.textContent + val;
+    }
+    newNum = parseInt(tempNum);
+    update();
+}
+
+const operators = document.querySelectorAll('.operator');
+operators.forEach(btn => btn.addEventListener('click', function() { useOperator(btn.textContent) }));
+
+function useOperator(op) {
+    if (oldNum == 0) {
+        oldNum = newNum;
+        newNum = 0;
+    } else {
+        oldNum = operate(oldNum, newNum, operator);
+        newNum = 0;
+    }
+    
+    if (op == 'y^') {
+        operator = '^';
+    } else {
+        operator = op;
+    }
+
+    update();
+}
+
+const backspace = document.querySelector('.backspace');
+backspace.addEventListener('click', undo);
+
+function undo() {
+    if (dispCurrentText.textContent.length <= 1 && oldNum < 1) {
+        clearDisplay();
+    } else if (dispCurrentText.textContent.length <= 1) {
+        dispCurrentText.textContent = '0';
+        newNum = parseInt(dispCurrentText.textContent);
+    } else {
+        dispCurrentText.textContent = dispCurrentText.textContent.slice(0, -1);
+        newNum = parseInt(dispCurrentText.textContent);
+        update();
+    }
+}
+
+const evaluate = document.querySelector('.equals');
+evaluate.addEventListener('click', eval);
+
+function eval() {
+    if (oldNum != 0) {
+        newNum = operate(oldNum, newNum, operator);
+        oldNum = 0;
+        operator = '';
+    }
+    update();
 }
