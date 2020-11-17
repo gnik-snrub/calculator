@@ -46,3 +46,31 @@ function operate(numOne, numTwo, operator) {
             return factorial(numOne);
     }
 }
+
+let dispLast = '';
+let dispCurrent = '';
+
+const dispLastText = document.querySelector('.display-last');
+const dispCurrentText = document.querySelector('.display-current');
+
+function displayUpdate() {
+    dispLastText.textContent = dispLast;
+    dispCurrentText.textContent = dispCurrent;
+}
+
+let clear = document.querySelector('.clear');
+clear.addEventListener('click', clearDisplay);
+
+function clearDisplay() {
+    dispLast = '';
+    dispCurrent = '';
+    displayUpdate();
+}
+
+const nums = document.querySelectorAll('.num');
+nums.forEach(btn => btn.addEventListener('click', function() { addNum(btn.textContent) }));
+
+function addNum(val) {
+    dispCurrent += `${val}`;
+    displayUpdate();
+}
